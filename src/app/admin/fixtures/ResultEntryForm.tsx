@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { submitFixtureResult } from "../actions";
 
+import Select from "react-select";
+
 type Player = { id: string; player_name: string; position: string | null; shirt_number: number | null };
 type FixtureData = {
   id: string;
@@ -40,6 +42,15 @@ export default function ResultEntryForm({ fixture, squad }: { fixture: FixtureDa
     );
   };
 
+  const formatOption = (p: Player) => {
+    return `${p.shirt_number ? `${p.shirt_number} - ` : ''}${p.player_name} ${p.position ? `(${p.position})` : ''}`;
+  };
+
+  const allOptions = squad.map(p => ({
+    value: p.id,
+    label: formatOption(p)
+  }));
+
   return (
     <form action={submitFixtureResult.bind(null, fixture.id)} className="mt-4 p-4 border rounded bg-gray-50">
       <h4 className="font-bold mb-2">{fixture.status === "COMPLETED" ? "Edit Match Results" : "Enter Match Results"}</h4>
@@ -57,20 +68,16 @@ export default function ResultEntryForm({ fixture, squad }: { fixture: FixtureDa
       <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-4">
         {Array.from({ length: 11 }).map((_, i) => (
           <div key={i}>
-            <select 
-              name={`player_${i}`}
-              required
-              className="border p-2 rounded w-full text-sm"
-              value={selectedPlayers[i]}
-              onChange={(e) => handlePlayerSelect(i, e.target.value)}
-            >
-              <option value="">Select Player {i + 1}</option>
-              {getAvailablePlayers(i).map(p => (
-                <option key={p.id} value={p.id}>
-                  {p.shirt_number ? `${p.shirt_number} - ` : ''}{p.player_name} {p.position ? `(${p.position})` : ''}
-                </option>
-              ))}
-            </select>
+            <Select
+              instanceId={`admin_player_select_${i}`}
+              options={getAvailablePlayers(i).map(p => ({ value: p.id, label: formatOption(p) }))}
+              value={allOptions.find(o => o.value === selectedPlayers[i]) || null}
+              onChange={(option) => handlePlayerSelect(i, option?.value || "")}
+              isClearable
+              placeholder={`Select Player ${i + 1}`}
+              className="text-sm"
+            />
+            <input type="hidden" name={`player_${i}`} value={selectedPlayers[i]} required />
           </div>
         ))}
       </div>

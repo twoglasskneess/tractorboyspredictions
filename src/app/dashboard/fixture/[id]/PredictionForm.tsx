@@ -2,6 +2,8 @@
 import { useState, useTransition } from "react";
 import { submitPrediction } from "../actions";
 
+import Select from "react-select";
+
 type Player = { id: string; player_name: string; position: string | null; shirt_number: number | null };
 type ExistingPred = { home: number; away: number; lineup: string[] } | null;
 
@@ -32,6 +34,15 @@ export default function PredictionForm({
       p => !selectedPlayers.includes(p.id) || selectedPlayers[currentIndex] === p.id
     );
   };
+
+  const formatOption = (p: Player) => {
+    return `${p.shirt_number ? `${p.shirt_number} - ` : ''}${p.player_name} ${p.position ? `(${p.position})` : ''}`;
+  };
+
+  const allOptions = squad.map(p => ({
+    value: p.id,
+    label: formatOption(p)
+  }));
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -78,20 +89,16 @@ export default function PredictionForm({
         {Array.from({ length: 11 }).map((_, i) => (
           <div key={i} className="flex flex-col">
             <label className="text-xs text-gray-500 mb-1">Player {i + 1}</label>
-            <select 
-              name={`player_${i}`}
-              required
-              className="border p-2 rounded w-full"
-              value={selectedPlayers[i]}
-              onChange={(e) => handlePlayerSelect(i, e.target.value)}
-            >
-              <option value="">Select Player</option>
-              {getAvailablePlayers(i).map(p => (
-                <option key={p.id} value={p.id}>
-                  {p.shirt_number ? `${p.shirt_number} - ` : ''}{p.player_name} {p.position ? `(${p.position})` : ''}
-                </option>
-              ))}
-            </select>
+            <Select
+              instanceId={`player_select_${i}`}
+              options={getAvailablePlayers(i).map(p => ({ value: p.id, label: formatOption(p) }))}
+              value={allOptions.find(o => o.value === selectedPlayers[i]) || null}
+              onChange={(option) => handlePlayerSelect(i, option?.value || "")}
+              isClearable
+              placeholder={`Select Player ${i + 1}`}
+              className="text-sm"
+            />
+            <input type="hidden" name={`player_${i}`} value={selectedPlayers[i]} required />
           </div>
         ))}
       </div>
