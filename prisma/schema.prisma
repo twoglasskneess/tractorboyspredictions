@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id                 String       @id @default(cuid())
+  username           String       @unique
+  password_hash      String
+  display_name       String
+  role               String       @default("USER") // "ADMIN" or "USER"
+  lineup_score_total Int          @default(0)
+  match_score_total  Int          @default(0)
+  predictions        Prediction[]
+}
+
+model Squad {
+  id           String   @id @default(cuid())
+  player_name  String
+  position     String?
+  shirt_number Int?
+  is_active    Boolean  @default(true)
+}
+
+model Fixture {
+  id                 String       @id @default(cuid())
+  opponent_name      String
+  match_date         DateTime
+  lock_time          DateTime
+  actual_home_score  Int?
+  actual_away_score  Int?
+  actual_lineup      String?      // JSON string of array of player IDs
+  status             String       @default("UPCOMING") // "UPCOMING", "LOCKED", "COMPLETED"
+  predictions        Prediction[]
+}
+
+model Prediction {
+  id                   String   @id @default(cuid())
+  user_id              String
+  fixture_id           String
+  predicted_home_score Int
+  predicted_away_score Int
+  predicted_lineup     String   // JSON string of array of 11 player IDs
+  
+  user                 User     @relation(fields: [user_id], references: [id])
+  fixture              Fixture  @relation(fields: [fixture_id], references: [id])
+}
