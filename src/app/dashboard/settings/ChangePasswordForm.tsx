@@ -14,11 +14,15 @@ export default function ChangePasswordForm() {
       setMessage("");
       setError("");
       changeMyPassword(formData)
-        .then(() => {
-          setMessage("Password changed successfully!");
-          (e.target as HTMLFormElement).reset();
+        .then((res) => {
+          if (res.error) {
+            setError(res.error);
+          } else {
+            setMessage("Password changed successfully!");
+            (e.target as HTMLFormElement).reset();
+          }
         })
-        .catch(err => setError(err.message));
+        .catch(() => setError("An unexpected error occurred"));
     });
   };
 
