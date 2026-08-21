@@ -18,6 +18,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           {session?.user?.role === "ADMIN" && (
             <Link href="/admin" className="bg-white text-[#0000FF] px-3 py-1 rounded text-sm font-bold hover:bg-gray-200">Admin Panel</Link>
           )}
+          <Link href="/dashboard/settings" className="text-sm font-bold hover:underline">Settings</Link>
           <LogoutButton />
         </div>
       </nav>
