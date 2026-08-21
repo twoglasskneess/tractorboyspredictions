@@ -6,7 +6,12 @@ import CreateFixtureForm from "./CreateFixtureForm";
 
 export default async function AdminFixturesPage() {
   const fixtures = await prisma.fixture.findMany({
-    orderBy: { match_date: "desc" }
+    orderBy: { match_date: "desc" },
+    include: {
+      predictions: {
+        include: { user: true }
+      }
+    }
   });
 
   const activeSquadUnsorted = await prisma.squad.findMany({
@@ -41,6 +46,14 @@ export default async function AdminFixturesPage() {
                   <div className="text-right">
                     <p className="text-2xl font-bold">{fixture.actual_home_score} - {fixture.actual_away_score}</p>
                   </div>
+                )}
+              </div>
+              <div className="mt-2 text-sm text-gray-700 bg-blue-50 p-3 rounded">
+                <strong>{fixture.predictions.length} Prediction{fixture.predictions.length !== 1 ? 's' : ''} submitted by: </strong>
+                {fixture.predictions.length > 0 ? (
+                  fixture.predictions.map(p => p.user.display_name).join(', ')
+                ) : (
+                  <span className="italic">No one yet</span>
                 )}
               </div>
               <ResultEntryForm fixture={fixture} squad={activeSquad} />
