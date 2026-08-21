@@ -13,6 +13,7 @@ export default async function DashboardPage() {
   });
 
   const users = await prisma.user.findMany({
+    where: { role: "USER" },
     select: { id: true, display_name: true, match_score_total: true, lineup_score_total: true }
   });
 
