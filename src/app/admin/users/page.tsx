@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
-import { createUser, resetPassword } from "../actions";
+import { createUser, resetPassword, deleteUser } from "../actions";
+import DeleteUserButton from "./DeleteUserButton";
 
 export default async function AdminUsersPage() {
   const users = await prisma.user.findMany({
@@ -49,12 +50,15 @@ export default async function AdminUsersPage() {
                 <td className="border p-2">{user.display_name}</td>
                 <td className="border p-2">{user.role}</td>
                 <td className="border p-2">
-                  <form action={resetPassword.bind(null, user.id)} className="flex gap-2">
-                    <input type="password" name="password" placeholder="New Password" required className="border p-1 rounded text-sm" />
-                    <button type="submit" className="bg-red-600 text-white px-2 py-1 rounded text-sm font-bold hover:bg-red-700">
-                      Reset Password
-                    </button>
-                  </form>
+                  <div className="flex gap-4 items-center">
+                    <form action={resetPassword.bind(null, user.id)} className="flex gap-2">
+                      <input type="password" name="password" placeholder="New Password" required className="border p-1 rounded text-sm" />
+                      <button type="submit" className="bg-blue-600 text-white px-2 py-1 rounded text-sm font-bold hover:bg-blue-700">
+                        Reset
+                      </button>
+                    </form>
+                    {user.role !== "ADMIN" && <DeleteUserButton userId={user.id} />}
+                  </div>
                 </td>
               </tr>
             ))}

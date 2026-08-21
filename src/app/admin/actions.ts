@@ -40,6 +40,20 @@ export async function resetPassword(userId: string, formData: FormData) {
   revalidatePath("/admin/users");
 }
 
+export async function deleteUser(userId: string) {
+  await checkAdmin();
+  // Delete predictions first to satisfy foreign key constraints
+  await prisma.prediction.deleteMany({
+    where: { user_id: userId }
+  });
+  // Then delete user
+  await prisma.user.delete({
+    where: { id: userId }
+  });
+  revalidatePath("/admin/users");
+  revalidatePath("/dashboard");
+}
+
 export async function createPlayer(formData: FormData) {
   await checkAdmin();
   const player_name = formData.get("player_name") as string;
