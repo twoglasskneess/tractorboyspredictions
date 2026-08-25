@@ -13,6 +13,22 @@ async function checkAdmin() {
   }
 }
 
+export async function deletePrediction(predictionId: string) {
+  await checkAdmin();
+  const prediction = await prisma.prediction.findUnique({ where: { id: predictionId } });
+  if (!prediction) return;
+  
+  await prisma.prediction.delete({
+    where: { id: predictionId }
+  });
+  
+  // Recalculate scores for this user just in case it was a completed fixture
+  await recalculateUserScores(prediction.user_id);
+  
+  revalidatePath("/admin/fixtures");
+  revalidatePath("/dashboard");
+}
+
 export async function createUser(formData: FormData) {
   await checkAdmin();
   const username = formData.get("username") as string;

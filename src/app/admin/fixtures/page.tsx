@@ -3,6 +3,7 @@ import ResultEntryForm from "./ResultEntryForm";
 import { sortSquad } from "@/lib/utils";
 import LocalTime from "@/components/LocalTime";
 import CreateFixtureForm from "./CreateFixtureForm";
+import DeletePredictionButton from "./DeletePredictionButton";
 
 export default async function AdminFixturesPage() {
   const fixtures = await prisma.fixture.findMany({
@@ -51,7 +52,14 @@ export default async function AdminFixturesPage() {
               <div className="mt-2 text-sm text-gray-700 bg-blue-50 p-3 rounded">
                 <strong>{fixture.predictions.length} Prediction{fixture.predictions.length !== 1 ? 's' : ''} submitted by: </strong>
                 {fixture.predictions.length > 0 ? (
-                  fixture.predictions.map(p => p.user.display_name).join(', ')
+                  <ul className="inline text-xs">
+                    {fixture.predictions.map((p, idx) => (
+                      <li key={p.id} className="inline-block bg-white border px-2 py-1 rounded shadow-sm mr-2 mb-2">
+                        {p.user.display_name}
+                        <DeletePredictionButton predictionId={p.id} userName={p.user.display_name} />
+                      </li>
+                    ))}
+                  </ul>
                 ) : (
                   <span className="italic">No one yet</span>
                 )}
