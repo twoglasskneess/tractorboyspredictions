@@ -29,6 +29,52 @@ export async function deletePrediction(predictionId: string) {
   revalidatePath("/dashboard");
 }
 
+export async function adminSubmitPrediction(fixtureId: string, formData: FormData) {
+  await checkAdmin();
+  
+  const user_id = formData.get("user_id") as string;
+  if (!user_id) throw new Error("No user selected");
+
+  const predicted_home_score = parseInt(formData.get("predicted_home_score") as string);
+  const predicted_away_score = parseInt(formData.get("predicted_away_score") as string);
+  
+  const lineup = [];
+  for (let i = 0; i < 11; i++) {
+    const val = formData.get(`player_${i}`);
+    if (val) lineup.push(val as string);
+  }
+  
+  if (new Set(lineup).size !== 11) {
+    throw new Error("Duplicate players or incomplete lineup");
+  }
+
+  const predicted_lineup = JSON.stringify(lineup);
+
+  const existing = await prisma.prediction.findFirst({
+    where: { user_id, fixture_id: fixtureId }
+  });
+
+  if (existing) {
+    await prisma.prediction.update({
+      where: { id: existing.id },
+      data: { predicted_home_score, predicted_away_score, predicted_lineup }
+    });
+  } else {
+    await prisma.prediction.create({
+      data: {
+        user_id,
+        fixture_id: fixtureId,
+        predicted_home_score,
+        predicted_away_score,
+        predicted_lineup
+      }
+    });
+  }
+
+  revalidatePath("/admin/fixtures");
+  revalidatePath(`/admin/fixtures/${fixtureId}`);
+}
+
 export async function createUser(formData: FormData) {
   await checkAdmin();
   const username = formData.get("username") as string;

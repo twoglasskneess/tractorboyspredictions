@@ -4,6 +4,7 @@ import { sortSquad } from "@/lib/utils";
 import LocalTime from "@/components/LocalTime";
 import CreateFixtureForm from "./CreateFixtureForm";
 import DeletePredictionButton from "./DeletePredictionButton";
+import Link from "next/link";
 
 export default async function AdminFixturesPage() {
   const fixtures = await prisma.fixture.findMany({
@@ -42,6 +43,11 @@ export default async function AdminFixturesPage() {
                   <p className="text-sm text-gray-600">Match Date: <LocalTime date={fixture.match_date} /></p>
                   <p className="text-sm text-gray-600">Lock Time: <LocalTime date={fixture.lock_time} /></p>
                   <p className="text-sm font-bold mt-1">Status: {fixture.status}</p>
+                  <div className="mt-2">
+                    <Link href={`/admin/fixtures/${fixture.id}`} className="inline-block bg-yellow-100 text-yellow-800 border border-yellow-300 text-xs font-bold px-2 py-1 rounded hover:bg-yellow-200">
+                      Override User Prediction
+                    </Link>
+                  </div>
                 </div>
                 {fixture.status === "COMPLETED" && (
                   <div className="text-right">
