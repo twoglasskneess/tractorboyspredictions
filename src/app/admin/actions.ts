@@ -162,6 +162,44 @@ export async function createFixture(formData: FormData) {
     data: { opponent_name, match_date, lock_time }
   });
   revalidatePath("/admin/fixtures");
+  revalidatePath("/dashboard");
+}
+
+export async function editFixture(fixtureId: string, formData: FormData) {
+  await checkAdmin();
+  const opponent_name = formData.get("opponent_name") as string;
+  const match_date = new Date(formData.get("match_date") as string);
+  const lock_time = new Date(formData.get("lock_time") as string);
+  
+  await prisma.fixture.update({
+    where: { id: fixtureId },
+    data: { opponent_name, match_date, lock_time }
+  });
+  revalidatePath("/admin/fixtures");
+  revalidatePath("/dashboard");
+  revalidatePath(`/dashboard/fixture/${fixtureId}`);
+}
+
+export async function deleteFixture(fixtureId: string) {
+  await checkAdmin();
+  
+  // Need to delete all predictions first to satisfy foreign key constraints
+  await prisma.prediction.deleteMany({
+    where: { fixture_id: fixtureId }
+  });
+  
+  await prisma.fixture.delete({
+    where: { id: fixtureId }
+  });
+  
+  // Recalculate all user scores just in case it was a completed fixture
+  const users = await prisma.user.findMany();
+  for (const user of users) {
+    await recalculateUserScores(user.id);
+  }
+  
+  revalidatePath("/admin/fixtures");
+  revalidatePath("/dashboard");
 }
 
 export async function submitFixtureResult(fixtureId: string, formData: FormData) {
