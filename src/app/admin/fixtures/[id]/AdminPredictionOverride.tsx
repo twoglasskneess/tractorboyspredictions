@@ -18,7 +18,7 @@ export default function AdminPredictionOverride({ fixtureId, squad, users, exist
 
   const userOptions = users.map((u: any) => ({
     value: u.id,
-    label: `${u.display_name} (${u.username})`
+    label: `${u.display_name} (${u.username})${!u.is_active ? ' [Hidden]' : ''}`
   }));
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {

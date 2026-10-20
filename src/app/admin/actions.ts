@@ -116,6 +116,16 @@ export async function deleteUser(userId: string) {
   revalidatePath("/dashboard");
 }
 
+export async function toggleUserActive(userId: string, current: boolean) {
+  await checkAdmin();
+  await prisma.user.update({
+    where: { id: userId },
+    data: { is_active: !current }
+  });
+  revalidatePath("/admin/users");
+  revalidatePath("/dashboard");
+}
+
 export async function createPlayer(formData: FormData) {
   await checkAdmin();
   const player_name = formData.get("player_name") as string;

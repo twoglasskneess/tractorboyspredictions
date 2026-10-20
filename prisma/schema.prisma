@@ -15,6 +15,7 @@ model User {
   password_hash      String
   display_name       String
   role               String       @default("USER") // "ADMIN" or "USER"
+  is_active          Boolean      @default(true)
   lineup_score_total Int          @default(0)
   match_score_total  Int          @default(0)
   predictions        Prediction[]

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { createUser, resetPassword, deleteUser } from "../actions";
+import { createUser, resetPassword, deleteUser, toggleUserActive } from "../actions";
 import DeleteUserButton from "./DeleteUserButton";
 
 export default async function AdminUsersPage() {
@@ -40,6 +40,7 @@ export default async function AdminUsersPage() {
               <th className="border p-2 text-left">Username</th>
               <th className="border p-2 text-left">Display Name</th>
               <th className="border p-2 text-left">Role</th>
+              <th className="border p-2 text-left">Leaderboard</th>
               <th className="border p-2 text-left">Actions</th>
             </tr>
           </thead>
@@ -50,13 +51,36 @@ export default async function AdminUsersPage() {
                 <td className="border p-2">{user.display_name}</td>
                 <td className="border p-2">{user.role}</td>
                 <td className="border p-2">
-                  <div className="flex gap-4 items-center">
+                  {user.role === "ADMIN" ? (
+                    <span className="text-xs text-gray-400 italic">Excluded (Admin)</span>
+                  ) : (
+                    <span className={`px-2 py-1 rounded text-xs font-bold ${user.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700'}`}>
+                      {user.is_active ? "Active" : "Hidden"}
+                    </span>
+                  )}
+                </td>
+                <td className="border p-2">
+                  <div className="flex gap-4 items-center flex-wrap">
                     <form action={resetPassword.bind(null, user.id)} className="flex gap-2">
                       <input type="password" name="password" placeholder="New Password" required className="border p-1 rounded text-sm" />
                       <button type="submit" className="bg-blue-600 text-white px-2 py-1 rounded text-sm font-bold hover:bg-blue-700">
                         Reset
                       </button>
                     </form>
+                    {user.role !== "ADMIN" && (
+                      <form action={toggleUserActive.bind(null, user.id, user.is_active)}>
+                        <button 
+                          type="submit" 
+                          className={`px-2 py-1 rounded text-sm font-bold border ${
+                            user.is_active 
+                              ? "bg-amber-100 text-amber-800 border-amber-300 hover:bg-amber-200" 
+                              : "bg-green-100 text-green-800 border-green-300 hover:bg-green-200"
+                          }`}
+                        >
+                          {user.is_active ? "Hide from Board" : "Show on Board"}
+                        </button>
+                      </form>
+                    )}
                     {user.role !== "ADMIN" && <DeleteUserButton userId={user.id} />}
                   </div>
                 </td>
